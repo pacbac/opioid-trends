@@ -7,11 +7,6 @@ from scripts.searchDrugCounty import search
 import csv
 
 class County: 
-    m_name = ""
-    m_state = ""
-    m_drugList = {}
-    m_lat = 0.0
-    m_lng = 0.0
     def __init__(self, nm,st,lt,ln):
         self.m_name = nm
         self.m_state = st
@@ -25,15 +20,33 @@ class County:
         ((math.cos((self.m_lat - otherCounty.m_lat)/2)*
         (self.m_lng-otherCounty.m_lng)**2))) )
 
+    def inputDrugList(self,dL):
+        return
 
 
+STATE_CODES = {
+'Virginia' : 'VA',
+'Ohio' : 'OH',
+'Kentucky' : 'KY',
+'Pennsylvania' : 'PA',
+'West Virginia' : 'WV'
+
+
+}
 allCounties = []
-with open(ROOT_WDIR +"/generated_data/latlng.csv") as cnties:
+with open(ROOT_WDIR +"/generated_data/latlng.csv") as cnties,open(ROOT_WDIR +"/generated_data/DrugList.csv") as drugs:
       countyReader = csv.DictReader(cnties)
-
+      drugsReader = csv.reader(drugs)
       for cnty in countyReader:
-        [name,state] = cnty['County'].split(',')
+        [name,state] = cnty['County'].split(', ')
+        name = str(name).upper()
+        state = STATE_CODES[state]
         allCounties.append(County(name,state,cnty['Latitude'],cnty['Longitude']))
+        for drug in drugsReader:
+            thisCounty = allCounties[-1]
+            allCounties[-1].m_drugList[drug[0]] = search(thisCounty.m_state,thisCounty.m_name,drug[0])
+print(search(allCounties[0].m_state,allCounties[0].m_name , "Oxycodone"))
+          
 
     
 
