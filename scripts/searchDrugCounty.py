@@ -5,8 +5,8 @@ from openpyxl import load_workbook, Workbook
 User input: State, County, Drug
 Output: Drug identification count for 2010 to 2017 (if available)
 """
-
-DATA_DIR = f'{os.getcwd()}/2019_MCMProblemC_DATA/MCM_NFLIS_Data.xlsx'
+ROOT_WDIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+DATA_DIR = f'{ROOT_WDIR}/2019_MCMProblemC_DATA/MCM_NFLIS_Data.xlsx'
 wb = load_workbook(DATA_DIR)
 sheet = wb.worksheets[1]
 states = {}

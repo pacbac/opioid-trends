@@ -5,7 +5,8 @@ import urllib.parse
 from decouple import config
 import pandas as pd
 
-DATA_DIR = f'{os.getcwd()}/2019_MCMProblemC_DATA/ACS_10_5YR_DP02/ACS_10_5YR_DP02_with_ann.csv'
+ROOT_WDIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+DATA_DIR = f'{ROOT_WDIR}/2019_MCMProblemC_DATA/ACS_10_5YR_DP02/ACS_10_5YR_DP02_with_ann.csv'
 COUNTY_COL_IND = 3
 
 data = pd.read_csv(DATA_DIR)
