@@ -58,7 +58,6 @@ with open(ROOT_WDIR +"/generated_data/latlng.csv") as cnties,open(ROOT_WDIR +"/g
         for drug in drugsReader:
             thisCounty = allCounties[-1]
             allCounties[-1].m_drugList[drug[0]] = search(thisCounty.m_state,thisCounty.m_name,drug[0])
-print(allCounties[-1].m_drugList)
           
 
     
