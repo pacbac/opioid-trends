@@ -9,13 +9,13 @@ ROOT_WDIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 DATA_DIR = f'{ROOT_WDIR}/2019_MCMProblemC_DATA/MCM_NFLIS_Data.xlsx'
 wb = load_workbook(DATA_DIR)
 sheet = wb.worksheets[1]
-states = {}
+states = {'KY': {}, 'VA': {}, 'WV': {}, 'PA': {}, 'OH': {}} # load drug counts in each state
+counties = {'KY': [], 'VA': [], 'WV': [], 'PA': [], 'OH': []} # counties list per state
 
 yrs = [ yr for yr in range(2010, 2018) ]
 
-def load():
+def loadDrugCount():
     global states
-    states = {'KY': {}, 'VA': {}, 'WV': {}, 'PA': {}, 'OH': {}}
     curYr = 2010
 
     for j in states.keys():
@@ -40,6 +40,17 @@ def search(stateIn, countyIn, drugIn):
         if (countyIn, drugIn) in states[stateIn][yr]:
             result[yr] = states[stateIn][yr][(countyIn, drugIn)]
     return result
+
+def loadCountyList():
+    for i in range(2, sheet.max_row+1):
+        county = sheet.cell(row=i, column=3).value
+        state = sheet.cell(row=i, column=2).value
+        if county not in counties[state]:
+            counties[state].append(county)
+
+def load():
+    loadDrugCount()
+    loadCountyList()
 
 def main():
     global states
