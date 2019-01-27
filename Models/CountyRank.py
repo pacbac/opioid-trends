@@ -60,10 +60,37 @@ def findStateOrigin(state,drug):
     for e in scores:
         if e.m_state == state:
             stateScores[e] = scores[e]
-    greatFive = sorted(stateScores.items(),  key=(lambda x : x[1])) [-5:]
-        
     
+    if stateScores:
+        return sorted(stateScores.items(),  key=(lambda x : x[1]))  [-1]
+    return "no instate origin"
 
-findStateOrigin("PA","Codeine")
+#function finds greatest drug uses in input state and writes them to         
+def findAlldrugsOrigin(state):
+    
+        d = {}
+        for drug in allCounties[0].drugNames():
+            top = findStateOrigin(state,drug)
+            if isinstance(top, str):
+                d[drug] = top
+            else:
+                d[drug] = top[0].m_name+ ' ' + str(top[1])
+        return d
+       
+def findAllStateOrigin():
+    with open(ROOT_WDIR + "/generated_data/countyRank_model_state_origin.csv", mode='w') as out_file:
+        writer = csv.writer(out_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        fieldns = allCounties[0].drugNames()
+        dwriter = csv.DictWriter(out_file,fieldnames=fieldns) 
+        for St in STATE_CODES:
+            writer.writerow([ '','',St])
+            d = findAlldrugsOrigin(STATE_CODES[St])
+            
+            writer.writerow(fieldns)
+            dwriter.writerow(d)
+
+
+
+findAllStateOrigin()
 
 
