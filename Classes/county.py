@@ -10,7 +10,7 @@ class County:
     """
     m_name: the county name in ALL CAPS
     m_state: the state the county is in in state code format, Ex. 'KY', 'PA', etc
-    m_drugList: drug list
+    m_drugList: drug list - contains drug->year->number of users
     m_lat = county latitude
     m_lng = county longitude
     """
@@ -20,6 +20,7 @@ class County:
         self.m_drugList = {}
         self.m_lat = lt
         self.m_lng = ln
+        self.
 
     """
     Finds the distance between two county objects
@@ -38,6 +39,7 @@ class County:
 
 
 
+
 STATE_CODES = {
     'Virginia' : 'VA',
     'Ohio' : 'OH',
@@ -47,18 +49,22 @@ STATE_CODES = {
 }
 
 allCounties = []
-with open(ROOT_WDIR +"/generated_data/latlng.csv") as cnties,open(ROOT_WDIR +"/generated_data/DrugList.csv") as drugs:
-      countyReader = csv.DictReader(cnties)
-      drugsReader = csv.reader(drugs)
-      for cnty in countyReader:
-        [name,state] = cnty['County'].split(', ')
-        name = str(name).upper()
-        state = STATE_CODES[state]
-        allCounties.append(County(name,state,cnty['Latitude'],cnty['Longitude']))
-        for drug in drugsReader:
-            thisCounty = allCounties[-1]
-            allCounties[-1].m_drugList[drug[0]] = search(thisCounty.m_state,thisCounty.m_name,drug[0])
-          
+def getAllCounties():
+    with open(ROOT_WDIR +"/generated_data/latlng.csv") as cnties, open(ROOT_WDIR +"/generated_data/DrugList.csv") as drugs:
+        countyReader = csv.DictReader(cnties)
+        drugsReader = csv.reader(drugs)
+        for cnty in countyReader:
+            [name,state] = cnty['County'].split(', ')
+            name = (str(name).split())[0].upper()
+            state = STATE_CODES[state]
+            
+            allCounties.append(County(name,state,cnty['Latitude'],cnty['Longitude']))
+            for drug in drugsReader:
+                thisCounty = allCounties[-1]
+                allCounties[-1].m_drugList[drug[0]] = search(thisCounty.m_state,thisCounty.m_name,drug[0])
+            drugs.seek(0)
+
+     
 
     
 
