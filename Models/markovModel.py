@@ -31,7 +31,7 @@ stateToCol = {
     'WV': 15
 }
 ELIMINATE_THRESHOLD = 0
-SIM_ITERS = 50
+SIM_ITERS = 30
 
 getAllCounties()
 """ 
@@ -41,6 +41,7 @@ These counties are candidates as the source of the drug
 def getCountyList(drug):
     # get counties that began using the drug in 2010 (starting nodes in the graph)
     global BEGIN_YR
+    BEGIN_YR = 2017
     countyList = []
     for county in counties:
         searchResult = search(county.m_state, county.m_name, drug)
@@ -152,7 +153,8 @@ def main(drug, drugNum):
     wb.save(DATA_DIR)
 
 if __name__ == "__main__":
-    for i in range(9, sheet.max_row+1):
+    for i in range(1, sheet.max_row+1):
         drug = sheet.cell(row=i, column=2).value
+        print("Start sim", drug)
         main(drug, i)
-        print(drug, "simulation completed.")
+        print("simulation completed.")
