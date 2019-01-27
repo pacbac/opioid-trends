@@ -36,6 +36,29 @@ class County:
     def __str__(self):
         return " ".join((self.m_name, self.m_state, "Lat:", self.m_lat, "Lng:", self.m_lng))
 
+    #returns the number of cases of drg in year yr
+    def drugCases(self,drg,yr):
+        if yr in self.m_drugList[drg]:
+            return self.m_drugList[drg][yr]
+        return 0
+    
+    def drugNames(self):
+        return self.m_drugList.keys()
+
+#function that sums f over drug users in year over the elements of counties
+def sumPopbyDrug(f,drug,year,counties):
+    sum = 0.0
+    for cnty in counties:
+            sum = sum + f(cnty.drugCases(drug,year))
+    return sum
+
+def countiesUseDrug(all,drug):
+    result = []
+    
+    for cnty in all:
+        if(len(cnty.m_drugList[drug]) != 0 ):
+            result.append(cnty)
+    return result
 
 
 
@@ -62,9 +85,5 @@ def getAllCounties():
                 thisCounty = allCounties[-1]
                 allCounties[-1].m_drugList[drug[0]] = search(thisCounty.m_state,thisCounty.m_name,drug[0])
             drugs.seek(0)
-
-     
-
-    
-
-    
+getAllCounties()
+print(allCounties[0].drugCases("Oxycodone",2010))    
