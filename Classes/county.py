@@ -20,6 +20,7 @@ class County:
         self.m_drugList = {}
         self.m_lat = lt
         self.m_lng = ln
+        self.
 
     """
     Finds the distance between two county objects
