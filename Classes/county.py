@@ -56,7 +56,7 @@ class County:
     def sumPop(f,drug,year,counties):
         sum = 0.0
         for cnty in counties:
-                sum = sum + f(cnty.drugCases(drug,year))
+                sum = sum + f(cnty)
         return sum
 
     @staticmethod
