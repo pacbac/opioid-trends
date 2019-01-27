@@ -54,10 +54,7 @@ class County:
     @staticmethod
     #function that sums f over drug users in year over the elements of counties
     def sumPop(f,drug,year,counties):
-        sum = 0.0
-        for cnty in counties:
-                sum = sum + f(cnty)
-        return sum
+        return sum(map(lambda cnty: f(cnty), counties))
 
     @staticmethod
     def countiesUseDrug(all,drug):
