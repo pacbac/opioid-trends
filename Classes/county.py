@@ -40,7 +40,7 @@ class County:
         return
 
     def __str__(self):
-        return " ".join((self.m_name, self.m_state, "Lat:", self.m_lat, "Lng:", self.m_lng))
+        return " ".join((self.m_name, self.m_state, "Lat:", str(self.m_lat), "Lng:", str(self.m_lng)) )
 
     #returns the number of cases of drg in year yr
     def drugCases(self,drg,yr):
