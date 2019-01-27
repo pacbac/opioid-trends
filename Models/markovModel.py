@@ -7,6 +7,11 @@ from Classes.county import County, getAllCounties, allCounties as counties
 import networkx as nx
 import numpy as np
 from random import random
+from openpyxl import load_workbook
+
+DATA_DIR = f'{ROOT_WDIR}/generated_data/DrugMarkov.xlsx'
+wb = load_workbook(DATA_DIR)
+sheet = wb.active
 
 """
 1. Find earliest year that counties use a drug
@@ -17,10 +22,16 @@ from random import random
 6. If pop A = 0 (A dies), remove it 
 """
 BEGIN_YR = 2017
-
 yrs = [yr for yr in range(BEGIN_YR, 2018)]
+stateToCol = {
+    'VA': 3,
+    'OH': 6,
+    'KY': 9,
+    'PA': 12,
+    'WV': 15
+}
 ELIMINATE_THRESHOLD = 0
-SIM_ITERS = 100
+SIM_ITERS = 50
 
 getAllCounties()
 """ 
@@ -67,18 +78,28 @@ def initSim(countyList, drug):
     normalizeEdges(G)
     return G
 
-def main(drug):
-    itList = list(map(lambda tup: tup[0].m_name, getCountyList(drug)))
+def main(drug, drugNum):
+    origCountyListCases = getCountyList(drug)
+    origCountyList = list(map(lambda tup: tup[0], origCountyListCases))
+    itList = list(map(lambda tup: tup[0].m_name, origCountyListCases))
     itCount = [0 for it in itList]
+    stateRecords = {}
+    for county in origCountyList:
+        if county.m_state not in stateRecords:
+            stateRecords[county.m_state] = {}
+        stateRecords[county.m_state][county.m_name] = 0
 
     for it in range(0, SIM_ITERS):
-        print("Round", it, "finished.")
+        print("Round", it, "start.")
         countyListCases = getCountyList(drug)
         maxCase = max(list(map(lambda tup: tup[1], countyListCases))) # highest drug case amount of all counties
         ELIMINATE_THRESHOLD = 0.4*maxCase if maxCase > 25 else 0
+        # filter out counties with drug cases that are sufficiently small (negligible)
         countyListCases = list(filter(lambda tup: tup[1] > ELIMINATE_THRESHOLD, countyListCases))
         countyList = list(map(lambda tup: tup[0], countyListCases))
-        countyCount = {}
+        stateCount = {}
+        for county in countyList:
+            stateCount[county.m_state] = 0 if county.m_state not in stateCount else stateCount[county.m_state] + 1
         G = initSim(countyList, drug)
 
         while(len(G) > 1):
@@ -96,6 +117,9 @@ def main(drug):
             while i < len(countyListCases):
                 county_i, dCases = countyListCases[i]
                 if dCases <= 0: 
+                    stateCount[county_i.m_state] -= 1
+                    if stateCount[county_i.m_state] <= 0:
+                        stateRecords[county_i.m_state][county_i.m_name] += 1
                     G.remove_node(county_i)
                     countyListCases.pop(i)
                     countyList.pop(i)
@@ -111,16 +135,24 @@ def main(drug):
             normalizeEdges(G)
 
         for node in G.nodes:
-            print(node.m_name)
+            stateRecords[node.m_state][node.m_name] += 1
             itCount[itList.index(node.m_name)] += 1
 
-    
-    print("Winner:", itCount[itCount.index(max(itCount))], itList[itCount.index(max(itCount))])
-    print("Score:")
-    for i, it in enumerate(itList):
-        print(it, itCount[i])
+    print("Overall drug source:", itCount[itCount.index(max(itCount))], itList[itCount.index(max(itCount))])
+    print("Drug source per state:")
+    for state in stateRecords:
+        name, count = sorted(list(stateRecords[state].items()), key=lambda kv: kv[1])[-1]
+        if count > 0:
+            print(f'{state}:', name)
+            sheet.cell(row=drugNum, column=stateToCol[state]).value = name
+        else:
+            county, count = sorted(list(filter(lambda case: case[0].m_state == state, origCountyListCases)), key=lambda kv: kv[1])[-1]
+            print(f'{state}:', county.m_name)
+            sheet.cell(row=drugNum, column=stateToCol[state]).value = county.m_name
+    wb.save(DATA_DIR)
 
 if __name__ == "__main__":
-    print("Input drug to simulate with:")
-    userIn = input()
-    main(userIn)
+    for i in range(9, sheet.max_rows+1):
+        drug = sheet.cell(row=i, column=2).value
+        main(drug, i)
+        print(drug, "simulation completed.")
