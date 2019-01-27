@@ -152,7 +152,7 @@ def main(drug, drugNum):
     wb.save(DATA_DIR)
 
 if __name__ == "__main__":
-    for i in range(9, sheet.max_rows+1):
+    for i in range(9, sheet.max_row+1):
         drug = sheet.cell(row=i, column=2).value
         main(drug, i)
         print(drug, "simulation completed.")
