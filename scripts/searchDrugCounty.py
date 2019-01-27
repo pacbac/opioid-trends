@@ -16,7 +16,6 @@ yrs = [ yr for yr in range(2010, 2018) ]
 
 def loadDrugCount():
     global states
-    curYr = 2010
 
     for j in states.keys():
         states[j] = {}
