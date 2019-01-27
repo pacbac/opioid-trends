@@ -87,11 +87,3 @@ def getAllCounties():
                 thisCounty = allCounties[-1]
                 allCounties[-1].m_drugList[drug[0]] = search(thisCounty.m_state,thisCounty.m_name,drug[0])
             drugs.seek(0)
-<<<<<<< Updated upstream
-=======
-     
-
-    
-
-    
->>>>>>> Stashed changes
