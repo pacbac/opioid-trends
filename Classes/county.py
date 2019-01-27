@@ -45,20 +45,22 @@ class County:
     def drugNames(self):
         return self.m_drugList.keys()
 
-#function that sums f over drug users in year over the elements of counties
-def sumPopbyDrug(f,drug,year,counties):
-    sum = 0.0
-    for cnty in counties:
-            sum = sum + f(cnty.drugCases(drug,year))
-    return sum
+    @staticmethod
+    #function that sums f over drug users in year over the elements of counties
+    def sumPopbyDrug(f,drug,year,counties):
+        sum = 0.0
+        for cnty in counties:
+                sum = sum + f(cnty.drugCases(drug,year))
+        return sum
 
-def countiesUseDrug(all,drug):
-    result = []
-    
-    for cnty in all:
-        if(len(cnty.m_drugList[drug]) != 0 ):
-            result.append(cnty)
-    return result
+    @staticmethod
+    def countiesUseDrug(all,drug):
+        result = []
+        
+        for cnty in all:
+            if(len(cnty.m_drugList[drug]) != 0 ):
+                result.append(cnty)
+        return result
 
 
 
