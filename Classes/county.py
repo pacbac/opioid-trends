@@ -18,8 +18,8 @@ class County:
         self.m_name = nm
         self.m_state = st
         self.m_drugList = {}
-        self.m_lat = lt
-        self.m_lng = ln
+        self.m_lat = float(lt)
+        self.m_lng = float(ln)
 
     """
     Finds the distance between two county objects
