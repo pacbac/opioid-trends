@@ -47,7 +47,7 @@ class County:
 
     @staticmethod
     #function that sums f over drug users in year over the elements of counties
-    def sumPopbyDrug(f,drug,year,counties):
+    def sumPop(f,drug,year,counties):
         sum = 0.0
         for cnty in counties:
                 sum = sum + f(cnty.drugCases(drug,year))
@@ -61,6 +61,14 @@ class County:
             if(len(cnty.m_drugList[drug]) != 0 ):
                 result.append(cnty)
         return result
+
+    @staticmethod
+    def yearDrugBegan(all,drug):
+        counties = County.countiesUseDrug(all,drug)
+        for i in range(2010,2018):
+            for cnty in counties:
+                if cnty.drugCases(drug,i) != 0 :
+                    return i
 
 
 
