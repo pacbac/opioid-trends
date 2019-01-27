@@ -26,9 +26,15 @@ class County:
     """
     def distanceTo(self,otherCounty):
          return math.sqrt(
-        ((self.m_lat - otherCounty.m_lat)**2 + 
-        ((math.cos((self.m_lat - otherCounty.m_lat)/2)*
-        (self.m_lng-otherCounty.m_lng)**2))) )
+        (
+            (self.m_lat - otherCounty.m_lat)**2 +
+        ((
+            math.cos(math.radians((self.m_lat + otherCounty.m_lat)/2)) * (self.m_lng-otherCounty.m_lng) 
+        )** 2)
+        
+        )
+        ) 
+        
 
     def inputDrugList(self,dL):
         return
