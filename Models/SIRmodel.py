@@ -128,7 +128,7 @@ def G(t):
     a2 = 0.0418
     freq = 0.7314
     return  generalHarmonic(a0,a1,a2,freq)(t)
-def FitData(state):
+def FitData(st):
     switcher = {
     PA : PAfit,
     VA : VAfit,
@@ -137,7 +137,7 @@ def FitData(state):
     KY : KYfit,
     total : totalfit
     }
-    return (lambda i : (switcher[state](i) - switcher[state](i-1)) )
+    return (lambda i : (switcher[st](i) - switcher[st](i-1)) )
 
 alpha = np.zeros((6,6),dtype = float)
 for state1 in range(5):
@@ -145,12 +145,10 @@ for state1 in range(5):
         alpha[state1][state2] = movementFunction(state1,state2) 
 alpha[5,:] = np.zeros((1,6),dtype = float)
 alpha[:,5] = np.zeros((1,6), dtype = float)
-beta = { PA : 0.55, VA : 0.06, WV : 0.55, OH : 0.55, KY : 0.55, total : 0.06 }
-gamma = { PA : 0.01, VA : 0.09, WV : 0.01, OH : 0.01, KY : 0.01, total : 0.09 }
+beta = { PA : 0.05, VA : 0.05, WV : 0.06, OH : 0.06, KY : 0.06, total : 0.06 }
+gamma = { PA : 0.09, VA : 0.09, WV : 0.06, OH : 0.09, KY : 0.09, total : 0.09 }
 
-def statePlot(state):
-
-    HW = {  
+HW = {  
     VA : [2298,1193,1709,4396,3132,3583,4261],
     OH :  [9301	,11004	,14633	,18340	,20590	,23347,20877],
     KY:	[629	,899	,2320	,4175	,4362	,4045	,3716],
@@ -161,7 +159,7 @@ def statePlot(state):
     
     
     
-    OW = {  
+OW = {  
     VA:	[39164,27776,30542,43298,29133,24236,29278],
     OH:	[61698,60278,70782,75407,80833,85803,94399],
     KY:	[28959,27386,25182,22645,22715,21766,22814],
@@ -170,83 +168,126 @@ def statePlot(state):
     total:	[215466,198853, 200251, 205906, 196955, 192402, 205545] }
  
 
-    RH = { PA : [0,0,0,0,0,0,0], VA : [0,0,0,0,0,0,0], WV : [0,0,0,0,0,0,0], OH : [0,0,0,0,0,0,0], KY : [0,0,0,0,0,0,0], total : [0,0,0,0,0,0,0] }
+RH = { PA : [0,0,0,0,0,0,0], VA : [0,0,0,0,0,0,0], WV : [0,0,0,0,0,0,0], OH : [0,0,0,0,0,0,0], KY : [0,0,0,0,0,0,0], total : [0,0,0,0,0,0,0] }
 
-    k = {
-    PA : 0,
-    VA : 0,
-    WV : 0 ,
-    OH : 0,
-    KY : 0,
+k = {
+    PA : 0.005,
+    VA : 0.005,
+    WV : 0.005 ,
+    OH : 0.005,
+    KY : 0.005,
     total : 0.005
     }#0.005
-    q =  {
-    PA : 0,
-    VA : 0,
-    WV : 0 ,
-    OH : 0,
-    KY : 0,
+q =  {
+    PA : 0.02,
+    VA : 0.02,
+    WV : 0.02 ,
+    OH : 0.02,
+    KY : 0.02,
     total : 0.02}
     #0.02
-    r =  {
-    PA : 0,
-    VA : 0,
-    WV : 0 ,
-    OH : 0,
-    KY : 0,
+r =  {
+    PA : 0.01,
+    VA : 0.01,
+    WV : 0.01,
+    OH : 0.01,
+    KY : 0.01,
     total : 0.01}
     #0.01
-  
-    rng = 50
-    back = len(OW[state])-1
-    for i in range(back,rng ):
-        OW[state].append(
-            (OW[state][i] + FitData(state)(i) + np.random.normal(0, k[state]*math.fabs(OW[state][i]))-beta[state]*OW[state][i-back]**2/(OW[state][i-back]+HW[state][i - back])))
-        HW[state].append((HW[state][i] #+  np.matmul(np.ones(6),alpha[state,:].T)
-         + beta[state]*OW[state][i-back]**2/(OW[state][i-back]+HW[state][i - back])- gamma[state]*HW[state][i-back]+np.random.normal(0,q[state]*math.fabs(HW[state][i]))))
-        
-        RH[state].append((RH[state][i] #- np.matmul(np.ones(6),alpha[state,:].T) 
-        + gamma[state]*HW[state][i-back] - np.random.normal(0,r[state]*math.fabs(RH[state][i])))) 
+
+def sumAlphaColumn(state, yr):
+    sum = 0.0
+    for st2 in beta:
+        if st2 != total:
+            sum = sum + alpha[st2][state] * gamma[st2] * HW[st2][yr]
+    return sum
+def sumAlphaRow(state, yr):
+    sum = 0.0
+    for st2 in beta:
+        if st2 != total:
+            sum = sum + alpha[state][st2] * gamma[st2] * HW[st2][yr]
+    return sum
+def dotType(state):
+    switcher = {
+    PA : ['b.','k.'],
+    VA : ['gv','bv'],
+    WV : ['r8','g8'],
+    OH : ['ch','rh'],
+    KY : ['m*','c*'],
+    total : ['y+','r+']
     
-    for i in range(0,len(OW[state])):
-        if OW[state][i] < 0:
-            OW[state][i] = 0#
-        OW[state][i] = OW[state][i]
-    
-    for i in range(0,len(HW[state])):
-        if HW[state][i] < 0:
-            HW[state][i] = 0
-        HW[state][i] = HW[state][i]
-   
-   
-    #plot functionality
-    fig,ax = plt.subplots()
-    textstr = '\n'.join((r'$\beta=%.2f$' % (beta[state], ),
-    r'$\gamma=%.2f$' % (gamma[state], ),
-    r'$\mathrm{k}=%.2f$' % (k[state],),
-    r'$\mathrm{q}=%.2f$' % (q[state],),
-    r'$\mathrm{r}=%.2f$' % (r[state],),
-    )
-    )
-    
-    txtstr2 = '\n'.join((r'',
+    }
+    return switcher[state]
+def codeToString(stat):
+    r =  {
+    PA : 'PA',
+    VA : 'VA',
+    WV : 'WV',
+    OH : 'OH',
+    KY : 'KY',
+    total : 'ALL'}
+    return r[stat]
+def getString(state):
+    switcher = {
+     VA : '\n'.join((r'',
     r'Fit of Heroin:',
-    r'f(t)=38000−7503cos(0.7192t)−11070sin(0.7182t)',
+    r'f(t)=2976-692.4cos(0.6168t)−948sin(0.6168t)',
     r'',
     r'Fit of Percentage:',
-    r'g(t)=0.156−0.0296cos(0.7314t)−0.0418sin⁡(0.7314t)'
+    r'g(t)=0.0863-0.0089cos(0.6975t)-0.041sin⁡(0.6975t)'
     )
-    )
-
-    props = dict(boxstyle='round', alpha=0.5)
-    ax.text(0.85, 0.95, textstr, transform=ax.transAxes, fontsize=14,
-        verticalalignment='top', bbox=props)
-    ax.text(0.60,0.70, txtstr2, transform=ax.transAxes, 
-    fontsize=14,verticalalignment='top', bbox=props)
-    plt.plot(range(rng+1),OW[state],'b.',label="Opiod Users")
-    plt.plot(range(rng+1),HW[state],'r.',label="Heroine Users")
-    legend = ax.legend(loc='upper center', shadow=True, fontsize='x-large')
+    ) ,
+    PA :'',
+    WV : '',
+    OH : '',
+    KY : '',
+    total : ''    }
+    return switcher[state]
+def allPlot(sta):
+    rng = 50
+    #loop over states
+    back = len(OW[PA])-1
+    for i in range(back,rng):
+        for st in beta:
+            OW[st].append(
+                (OW[st][i] + FitData(st)(i) + np.random.normal(0, k[st]*math.fabs(OW[st][i]))-beta[st]*OW[st][i-back]**2/(OW[st][i-back]+HW[st][i - back])))
+            
+            HW[st].append((HW[st][i] + sumAlphaColumn(st,i) #+  np.matmul(np.ones(6),alpha[st,:].T)
+            + beta[st]*OW[st][i-back]**2/(OW[st][i-back]+HW[st][i - back])- gamma[st]*HW[st][i-back]+np.random.normal(0,q[st]*math.fabs(HW[st][i]))))
+            
+            RH[st].append((RH[st][i] - sumAlphaRow(st,i)#- np.matmul(np.ones(6),alpha[st,:].T) 
+            + gamma[st]*HW[st][i-back] - np.random.normal(0,r[st]*math.fabs(RH[st][i])))) 
+        
+            for j in range(0,len(OW[st])):
+                if OW[st][i] < 0:
+                    OW[st][i] = 0
+                    
+            for j in range(0,len(HW[st])):
+                if HW[st][i] < 0:
+                    HW[st][i] = 0   
+     #plot functionality
+    
+    fig,ax = plt.subplots()
+    for sat in beta:
+        '''textstr = '\n'.join((r'$\beta=%.2f$' % (beta[sat], ),
+        r'$\gamma=%.2f$' % (gamma[sat], ),
+        r'$\mathrm{k}=%.2f$' % (k[sat],),
+        r'$\mathrm{q}=%.2f$' % (q[sat],),
+        r'$\mathrm{r}=%.2f$' % (r[sat],),
+        )
+        )
+        print(sat)
+        txtstr2 = getString(sat)
+        props = dict(boxstyle='round', alpha=0.5)
+       '''''' ax.text(0.85, 0.95, textstr, transform=ax.transAxes, fontsize=14,
+            verticalalignment='top', bbox=props)
+        ax.text(0.60,0.70, txtstr2, transform=ax.transAxes, 
+        fontsize=14,verticalalignment='top', bbox=props)
+       ''' 
+        plt.plot(range(rng+1),HW[sat],dotType(sat)[1],label=codeToString(sat)+" Heroine Users")
+        legend = ax.legend(loc='upper right', shadow=True, fontsize='x-large')
 
     plt.show()
     
-statePlot(VA)
+allPlot(VA)
+
