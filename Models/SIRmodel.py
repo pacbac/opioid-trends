@@ -4,11 +4,9 @@ import math
 import os, sys
 ROOT_WDIR = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
 sys.path.insert(0, ROOT_WDIR)
-from Classes.county import *
 import matplotlib.pyplot as plt
-#from sympy import *
 
-#constants
+#constants to each state
 PA = 0
 VA = 1
 WV = 2
@@ -16,31 +14,27 @@ OH = 3
 KY = 4
 total = 5
 
-class State:
-    def __init__(self,name,lat,lng ):
-        self.m_name = name
-        self.m_code = STATE_CODES[name]
-        self.m_lat = lat
-        self.m_lng = lng
-        self.m_drugList ={}
-        self.countyList = {}
-
-
+#dictionary holds coordinates for each state
 #coordinate Dictionary, format-latitude,longitude
 coordinates = { PA : [41.1003153,-79.8481507], VA : [37.9864035,-81.6645646], WV : [38.9029755,-82.4252759], OH : [40.3477892,-84.9127508], KY : [37.805356,-88.0118901] }
+
+#distance function to calculate distance between states
 def distance(state1,state2):
     return math.sqrt(
         (coordinates[state1][0] - coordinates[state2][0])**2 + ((math.cos((coordinates[state1][0]+coordinates[state2][0])/2)*(coordinates[state1][1]-coordinates[state2][1]))**2))
 
+#movement function used to model population transfer between states
 def movementFunction(state1,state2):
     if state1 != state2 :
         return 1/(10*distance(state1,state2))
     return 0
 
+#A general template of a harmonic functionn
 def generalHarmonic(a0,a1,a2,freq):
     return (lambda x : a0 + a1 * math.cos(freq*x) + a2 * math.sin(freq*x)
     )
 
+#various functions describing fourier functions for each state
 def PAfit(x):
     Fa0 = 15110 
     Fa1 = 250.9 
@@ -115,19 +109,7 @@ def totalfit(x):
   
     return y
 
-def F(t):
-    a0 = 38000
-    a1 = 7503
-    a2 = 11070
-    freq = 0.7192
-    return  generalHarmonic(a0,a1,a2,freq)(t)
-
-def G(t):
-    a0 = 0.156
-    a1 = 0.0296
-    a2 = 0.0418
-    freq = 0.7314
-    return  generalHarmonic(a0,a1,a2,freq)(t)
+#function takes state and returns a fourier fuction cooresponding to the state
 def FitData(st):
     switcher = {
     PA : PAfit,
@@ -139,15 +121,20 @@ def FitData(st):
     }
     return (lambda i : (switcher[st](i) - switcher[st](i-1)) )
 
+#alpha is a matrix that stores movement coefficient between two states
 alpha = np.zeros((6,6),dtype = float)
 for state1 in range(5):
     for state2 in range(5):
         alpha[state1][state2] = movementFunction(state1,state2) 
 alpha[5,:] = np.zeros((1,6),dtype = float)
 alpha[:,5] = np.zeros((1,6), dtype = float)
-beta = { PA : 0.05, VA : 0.05, WV : 0.06, OH : 0.06, KY : 0.06, total : 0.06 }
-gamma = { PA : 0.09, VA : 0.09, WV : 0.06, OH : 0.09, KY : 0.09, total : 0.09 }
 
+#dictionaries store probability variables for eachstate
+beta = { PA : 0.05, VA : 0.05, WV : 0.06, OH : 0.06, KY : 0.06, total : 0.05 }
+gamma = { PA : 0.06, VA : 0.09, WV : 0.06, OH : 0.09, KY : 0.09, total : 0.09 }
+
+#dictionary holds Number of Heroine cases for each state
+#each state initialized with first 6 years of data as provided
 HW = {  
     VA : [2298,1193,1709,4396,3132,3583,4261],
     OH :  [9301	,11004	,14633	,18340	,20590	,23347,20877],
@@ -158,7 +145,8 @@ HW = {
     }
     
     
-    
+#dictionary holds Number of Opiod cases for each state
+#each state initialized with first 6 years of data as provided
 OW = {  
     VA:	[39164,27776,30542,43298,29133,24236,29278],
     OH:	[61698,60278,70782,75407,80833,85803,94399],
@@ -167,9 +155,11 @@ OW = {
     WV:	[7766,8361,8254,7205,5410,4210,4237],
     total:	[215466,198853, 200251, 205906, 196955, 192402, 205545] }
  
-
+#dictionary holds the number of people recoverd
+#initialized as per model
 RH = { PA : [0,0,0,0,0,0,0], VA : [0,0,0,0,0,0,0], WV : [0,0,0,0,0,0,0], OH : [0,0,0,0,0,0,0], KY : [0,0,0,0,0,0,0], total : [0,0,0,0,0,0,0] }
 
+#Dictionary holding constants used to produce White Noise
 k = {
     PA : 0.005,
     VA : 0.005,
@@ -177,7 +167,7 @@ k = {
     OH : 0.005,
     KY : 0.005,
     total : 0.005
-    }#0.005
+    }
 q =  {
     PA : 0.02,
     VA : 0.02,
@@ -185,7 +175,7 @@ q =  {
     OH : 0.02,
     KY : 0.02,
     total : 0.02}
-    #0.02
+    
 r =  {
     PA : 0.01,
     VA : 0.01,
@@ -193,7 +183,7 @@ r =  {
     OH : 0.01,
     KY : 0.01,
     total : 0.01}
-    #0.01
+    
 
 def sumAlphaColumn(state, yr):
     sum = 0.0
@@ -243,51 +233,40 @@ def getString(state):
     KY : '',
     total : ''    }
     return switcher[state]
-def allPlot(sta):
+
+#function plots results for all states and the net result
+def allPlot():
     rng = 50
-    #loop over states
+    #loo
     back = len(OW[PA])-1
     for i in range(back,rng):
         for st in beta:
+
+            #differential equations used to model Opiod users (OW) and Heroin Users (HW)
             OW[st].append(
-                (OW[st][i] + FitData(st)(i) + np.random.normal(0, k[st]*math.fabs(OW[st][i]))-beta[st]*OW[st][i-back]**2/(OW[st][i-back]+HW[st][i - back])))
+                 (OW[st][i] + FitData(st)(i) + np.random.normal(0, k[st]*math.fabs(OW[st][i]))-beta[st]*OW[st][i-back]**2/(1+OW[st][i-back]+HW[st][i - back]))) 
             
-            HW[st].append((HW[st][i] + sumAlphaColumn(st,i) #+  np.matmul(np.ones(6),alpha[st,:].T)
-            + beta[st]*OW[st][i-back]**2/(OW[st][i-back]+HW[st][i - back])- gamma[st]*HW[st][i-back]+np.random.normal(0,q[st]*math.fabs(HW[st][i]))))
+            HW[st].append((HW[st][i] + sumAlphaColumn(st,i)
+            + beta[st]*OW[st][i-back]**2/(1+OW[st][i-back]+HW[st][i - back])- gamma[st]*HW[st][i-back]+np.random.normal(0,q[st]*math.fabs(HW[st][i]))))
             
-            RH[st].append((RH[st][i] - sumAlphaRow(st,i)#- np.matmul(np.ones(6),alpha[st,:].T) 
-            + gamma[st]*HW[st][i-back] - np.random.normal(0,r[st]*math.fabs(RH[st][i])))) 
+            RH[st].append((RH[st][i] - sumAlphaRow(st,i)) 
+            + gamma[st]*HW[st][i-back] - np.random.normal(0,r[st]*math.fabs(RH[st][i]))) 
         
             for j in range(0,len(OW[st])):
-                if OW[st][i] < 0:
-                    OW[st][i] = 0
-                    
+                if OW[st][j] < 0:
+                    OW[st][j] = 0
             for j in range(0,len(HW[st])):
-                if HW[st][i] < 0:
-                    HW[st][i] = 0   
-     #plot functionality
+                if HW[st][j] < 0:
+                    HW[st][j] = 0   
     
+    
+    #plot functionality
     fig,ax = plt.subplots()
-    for sat in beta:
-        '''textstr = '\n'.join((r'$\beta=%.2f$' % (beta[sat], ),
-        r'$\gamma=%.2f$' % (gamma[sat], ),
-        r'$\mathrm{k}=%.2f$' % (k[sat],),
-        r'$\mathrm{q}=%.2f$' % (q[sat],),
-        r'$\mathrm{r}=%.2f$' % (r[sat],),
-        )
-        )
-        print(sat)
-        txtstr2 = getString(sat)
-        props = dict(boxstyle='round', alpha=0.5)
-       '''''' ax.text(0.85, 0.95, textstr, transform=ax.transAxes, fontsize=14,
-            verticalalignment='top', bbox=props)
-        ax.text(0.60,0.70, txtstr2, transform=ax.transAxes, 
-        fontsize=14,verticalalignment='top', bbox=props)
-       ''' 
-        plt.plot(range(rng+1),HW[sat],dotType(sat)[1],label=codeToString(sat)+" Heroine Users")
-        legend = ax.legend(loc='upper right', shadow=True, fontsize='x-large')
+    for sat in beta: 
+        plt.plot(range(rng),HW[sat][:-1],dotType(sat)[1],label=codeToString(sat)+" Heroine Users")
+    legend = ax.legend(loc='upper right', shadow=True, fontsize='x-large')
 
     plt.show()
     
-allPlot(VA)
+allPlot()
 

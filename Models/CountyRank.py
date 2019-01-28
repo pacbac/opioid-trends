@@ -33,8 +33,11 @@ def getScore(all,cnty, drug,year):
     #if only one county then we assign 0            
     return 0.0
 
+#sum up function that models spatial factors
 def sumSpatialFactors(cnty,drug,year,otherCounties):
    return County.sumPop(metaFunc(cnty,drug,year),drug,year,otherCounties)
+
+#sum up time factors
 def sumTime(cnty,drug):
     n = 0
     sum = 0.0
@@ -54,6 +57,7 @@ def metaFunc(cnty,drug,year):
     ) **(1/(1+ 25 * cnty.distanceTo(x)))
 )
 
+#function finds the probable origin of drug in the given state
 def findStateOrigin(state,drug):
     scores = findScores(drug)
     stateScores = {}
@@ -76,7 +80,8 @@ def findAlldrugsOrigin(state):
             else:
                 d[drug] = top[0].m_name+ ' ' + str(top[1])
         return d
-       
+
+#function that finds the origin of all drugs in all states       
 def findAllStateOrigin():
     with open(ROOT_WDIR + "/generated_data/countyRank_model_state_origin.csv", mode='w') as out_file:
         writer = csv.writer(out_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
